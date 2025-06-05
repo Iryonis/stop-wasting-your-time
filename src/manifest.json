@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Stop Wasting Your Time",
+  "version": "1.0",
+  "description": "Redirige automatiquement les vidéos Shorts si activé.",
+  "permissions": ["scripting", "tabs", "storage"],
+  "host_permissions": ["*://www.youtube.com/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  }
+}

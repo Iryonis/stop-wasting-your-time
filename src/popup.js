@@ -8,6 +8,7 @@ let sliderValues = {
 
 let chronoTime = 30; // Valeur par défaut pour le chrono (en minutes)
 let countdownInterval = null; // pour clearInterval plus tard
+let timeDown = false; // pour savoir si le temps est écoulé
 
 formatTextFromSlider = (sliderValue) => {
   return sliderValues[sliderValue] || 0;
@@ -34,6 +35,7 @@ formatTimeFull = (totalSeconds) => {
 // ➕ Lancer le chrono avec chronoTime (en minutes)
 startCountdown = () => {
   if (countdownInterval) clearInterval(countdownInterval);
+  console.log(timeDown);
 
   const display = document.getElementById("countdown-display");
   const durationMs = chronoTime * 60 * 1000;
@@ -48,8 +50,8 @@ startCountdown = () => {
 
     if (remaining === 0) {
       clearInterval(countdownInterval);
-      // ➕ Ajoute ton comportement ici (ex: redirection, popup...)
-      alert("Temps écoulé !");
+      timeDown = true;
+      chrome.storage.sync.set({ redirectEnabled: timeDown });
     }
   }
 
@@ -74,6 +76,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // Correction de updateChrono pour prendre la valeur du slider
   window.updateChrono = () => {
     chronoTime = formatTextFromSlider(Number(slider.value));
+    timeDown = false; // Réinitialiser le flag
     startCountdown();
   };
+
+  chrome.storage.sync.get(["redirectEnabled"], (data) => {
+    timeDown = data.redirectEnabled || false;
+  });
 });
