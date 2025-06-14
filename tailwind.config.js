@@ -2,7 +2,11 @@
 module.exports = {
   content: ["./src/**/*.{html,js}"],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        signika: ["Signika", "sans-serif"],
+      },
+    },
   },
   plugins: [],
 };
