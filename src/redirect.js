@@ -1,15 +1,16 @@
-let redirectUrl = "redirect.html";
-
 function redirectIfShorts(url) {
   if (url.includes("/shorts/")) {
-    window.location.replace(redirectUrl);
+    // Alternative : construire l'URL manuellement
+    const extensionId = chrome.runtime.id;
+    const redirectUrl = `chrome-extension://${extensionId}/redirect.html`;
+    window.location.href = redirectUrl;
   }
 }
 
 // Redirige au chargement initial
 redirectIfShorts(window.location.href);
 
-// Observe les changements d’URL dans la SPA
+// Observe les changements d'URL dans la SPA
 let lastUrl = location.href;
 new MutationObserver(() => {
   const currentUrl = location.href;

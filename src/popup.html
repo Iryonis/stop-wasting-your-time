@@ -6,20 +6,20 @@
     <link rel="stylesheet" href="output.css" />
     <script src="./popup.js"></script>
   </head>
-  <body>
-    <div>
-      <h1 class="text-9xl font-bold mb-2 text-center">
+  <body class="w-[400px] h-[475px] overflow-auto">
+    <div class="bg-gray-100">
+      <h1 class="text-5xl font-bold mb-2 text-center">
         Stop Wasting Your Time
       </h1>
-      <h2 class="text-8xl text-left">You have</h2>
+      <h2 class="text-4xl text-left">You have</h2>
       <div class="flex items-center justify-center w-full">
         <div class="border border-black text-center w-1/2 bg-gray-200">
-          <span class="text-9xl font-bold m-6" id="countdown-display"
+          <span class="text-4xl font-bold m-6" id="countdown-display"
             >00:30:00</span
           >
         </div>
       </div>
-      <h2 class="text-8xl text-right">remaining !</h2>
+      <h2 class="text-4xl text-right">remaining !</h2>
 
       <hr class="border-4 border-black my-8" />
 
@@ -36,7 +36,6 @@
             max="100"
             step="25"
             id="slider-input"
-            oninput="this.previousElementSibling.innerText=this.value"
           />
           <div class="-mt-2 flex w-full justify-between">
             <span class="text-sm text-gray-600">0</span>
@@ -49,7 +48,6 @@
         <button
           class="border px-4 py-2 rounded-lg hover:opacity-90 active:scale-90 bg-blue-500"
           id="update-button"
-          onclick="updateChrono()"
         >
           Mettre à jour
         </button>

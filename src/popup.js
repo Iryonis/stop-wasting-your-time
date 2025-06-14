@@ -1,5 +1,5 @@
 let sliderValues = {
-  0: 0,
+  0: 0.2,
   25: 15,
   50: 30,
   75: 60,
@@ -51,7 +51,12 @@ startCountdown = () => {
     if (remaining === 0) {
       clearInterval(countdownInterval);
       timeDown = true;
-      chrome.storage.sync.set({ redirectEnabled: timeDown });
+      // Active la redirection dans le storage
+      chrome.storage.sync.set({ redirectEnabled: true }, () => {
+        console.log("Redirection activée");
+        // Injecte immédiatement le script sur tous les onglets YouTube ouverts
+        activateRedirectionOnExistingTabs();
+      });
     }
   }
 
@@ -59,10 +64,26 @@ startCountdown = () => {
   countdownInterval = setInterval(tick, 1000);
 };
 
+// Fonction pour activer la redirection sur les onglets YouTube déjà ouverts
+function activateRedirectionOnExistingTabs() {
+  chrome.tabs.query({ url: "*://www.youtube.com/*" }, (tabs) => {
+    tabs.forEach((tab) => {
+      chrome.scripting
+        .executeScript({
+          target: { tabId: tab.id },
+          files: ["redirect.js"],
+        })
+        .catch((err) => console.log("Erreur injection:", err));
+    });
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const slider = document.getElementById("slider-input");
   const valueText = document.getElementById("slider-value-text");
-  // Suppression de chrono-input (inutile)
+  const updateButton = document.getElementById("update-button");
+
+  valueText.innerText = slider.value;
 
   function updateSliderText() {
     valueText.textContent = formatTimeInString(
@@ -72,6 +93,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   slider.addEventListener("input", updateSliderText);
   updateSliderText(); // Initialisation au chargement
+
+  updateButton.addEventListener("click", () => {
+    // Correction de l'appel à updateChrono
+    updateChrono();
+  });
 
   // Correction de updateChrono pour prendre la valeur du slider
   window.updateChrono = () => {
