@@ -120,19 +120,19 @@ document.addEventListener("DOMContentLoaded", () => {
   updateSliderText(slider, valueText);
 
   /**
-   * Retrieve the countdown duration from storage and update the display and slider.
+   * Retrieves the countdown duration selected by the user from storage and update the display and slider.
    *
    * If a countdown duration is found, it updates the display and slider to reflect the stored value.
    * If no countdown duration is found, it uses the default countdown time.
    * This is done to ensure that the countdown starts with the correct value when the popup is opened.
    */
-  chrome.storage.sync.get(["countdownDuration"], (data) => {
-    if (data.countdownDuration) {
-      countdownTime = data.countdownDuration;
-      display.textContent = formatTimeFull(countdownTime * 60);
+  chrome.storage.sync.get(["countdownDurationNext"], (data) => {
+    if (data.countdownDurationNext) {
+      countdownTime = data.countdownDurationNext;
+      display.textContent = formatTimeFull(countdownTime);
       const sliderVal =
         Object.keys(sliderValues).find(
-          (key) => sliderValues[key] === countdownTime
+          (key) => sliderValues[key] === countdownTime / 60
         ) || 50;
       slider.value = sliderVal;
       updateSliderText(slider, valueText);
