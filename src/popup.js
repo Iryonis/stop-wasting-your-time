@@ -1,3 +1,7 @@
+/**
+ * Script for the popup of the extension.
+ */
+
 // Dictionary for slider values
 let sliderValues = {
   0: 0.2,

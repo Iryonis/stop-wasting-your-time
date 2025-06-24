@@ -16,6 +16,10 @@
     {
       "resources": ["redirect.html", "output.css"],
       "matches": ["*://www.youtube.com/*"]
+    },
+    {
+      "resources": ["redirect.html", "redirect_page.js"],
+      "matches": ["<all_urls>"]
     }
   ]
 }

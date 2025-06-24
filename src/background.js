@@ -1,3 +1,7 @@
+/**
+ * Background script for the extension.
+ */
+
 let countdownInterval = null; // Interval for the countdown
 let countdownDefaultTime = 15 * 60; // Default value for the countdown in seconds
 
@@ -264,6 +268,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }
       );
       return true;
+    case "closeCurrentTab":
+      if (sender.tab && sender.tab.id) {
+        chrome.tabs.remove(sender.tab.id);
+      }
+      break;
   }
 });
 

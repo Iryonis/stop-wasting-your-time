@@ -1,4 +1,12 @@
-function applyTranslations(root = document.body) {
+/**
+ * Internationalization support for the extension.
+ */
+
+/**
+ * Applies translations to the specified root element.
+ * @param {HTMLElement} root
+ */
+const applyTranslations = (root = document.body) => {
   const walker = document.createTreeWalker(
     root,
     NodeFilter.SHOW_ELEMENT,
@@ -18,7 +26,7 @@ function applyTranslations(root = document.body) {
       }
     }
   }
-}
+};
 
 document.addEventListener("DOMContentLoaded", () => {
   applyTranslations();
