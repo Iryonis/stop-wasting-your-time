@@ -1,16 +1,29 @@
-function redirectIfShorts(url) {
+// Prevent multiple injections
+if (window.shortsRedirectInjected) {
+  return;
+}
+window.shortsRedirectInjected = true;
+
+/**
+ * Redirects to the redirect page if the URL contains "/shorts/".
+ * @param {string} url - The current URL to check for "/shorts/"
+ */
+const redirectIfShorts = (url) => {
   if (url.includes("/shorts/")) {
-    // Alternative : construire l'URL manuellement
     const extensionId = chrome.runtime.id;
     const redirectUrl = `chrome-extension://${extensionId}/redirect.html`;
     window.location.href = redirectUrl;
   }
-}
+};
 
-// Redirige au chargement initial
+// Redirect on initial load
 redirectIfShorts(window.location.href);
 
-// Observe les changements d'URL dans la SPA
+/**
+ * Observe URL changes in the SPA
+ * This is necessary for single-page applications (like YouTube)
+ * where the URL may change without a full page reload.
+ */
 let lastUrl = location.href;
 new MutationObserver(() => {
   const currentUrl = location.href;

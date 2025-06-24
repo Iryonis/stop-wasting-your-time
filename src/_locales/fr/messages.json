@@ -21,9 +21,12 @@
     "message": "SWYT - Fenêtre pop-up"
   },
   "popup_text": {
-    "message": "Ci-dessous, vous pouvez personnaliser la durée du prochain compte à rebours."
+    "message": "Ci-dessous, vous pouvez changer la durée du prochain compte à rebours."
   },
   "popup_button": {
     "message": "Mettre à jour la durée"
+  },
+  "popup_button_next": {
+    "message": "Mettre à jour la durée pour demain"
   }
 }
