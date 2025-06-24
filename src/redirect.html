@@ -4,29 +4,40 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="output.css" />
-    <title>SWYT - Redirect Page</title>
+    <script defer src="./i18n.js"></script>
+    <title i18n-content="redirect_title">SWYT - Redirect Page</title>
   </head>
   <body class="bg-[#A5CBC3] text-[#12263a]">
     <div class="flex items-center justify-center w-screen h-screen -mt-20">
-      <h1 class="ml-40 text-8xl font-signika">
-        <span class="text-black">S</span>top
-        <span class="text-black">W</span>asting
-        <span class="text-black">Y</span>our
-        <span class="text-black">T</span>ime
+      <h1 class="ml-40 text-8xl font-signika flex flex-col">
+        <div>
+          <span class="text-black">S</span>top
+          <span class="text-black">W</span>asting
+          <span class="text-black">Y</span>our
+          <span class="text-black">T</span>ime
+        </div>
+        <span
+          class="text-center text-2xl mt-4"
+          i18n-content="redirect_subtitle"
+        ></span>
       </h1>
+
       <hr class="border-4 border-[#12263a] my-8 w-3/4" />
       <div class="ml-10 mr-40 text-4xl text-left">
-        <span class="font-thin"> You have exceeded your daily limit.</span>
+        <span class="font-thin" i18n-content="redirect_limit"
+          >You have exceeded your daily limit.</span
+        >
         <hr class="my-4 border border-[#95190C]" />
         <span class="font-semibold tracking-tighter">
-          Click
+          <span i18n-content="redirect_click_1">Click </span>
           <button
             id="close-button"
-            class="text-[#107E7D] hover:underline hover:text-[#13908E] hover:cursor-pointer active:scale-90 active:text-[#0E6C6B]"
+            i18n-content="redirect_click_2"
+            class="text-[#107E7D] hover:underline hover:text-[#13908E] hover:cursor-pointer active:scale-90"
           >
             here
           </button>
-          to close this tab.
+          <span i18n-content="redirect_click_3"> to close this tab.</span>
         </span>
       </div>
     </div>

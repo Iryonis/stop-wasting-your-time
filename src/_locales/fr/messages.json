@@ -1,0 +1,29 @@
+{
+  "redirect_title": {
+    "message": "SWYT - Page de redirection"
+  },
+  "redirect_subtitle": {
+    "message": "Arrêtez de perdre votre temps"
+  },
+  "redirect_limit": {
+    "message": "Vous avez dépassé votre limite quotidienne."
+  },
+  "redirect_click_1": {
+    "message": "Cliquez "
+  },
+  "redirect_click_2": {
+    "message": "ici"
+  },
+  "redirect_click_3": {
+    "message": " pour fermer cet onglet."
+  },
+  "popup_title": {
+    "message": "SWYT - Fenêtre pop-up"
+  },
+  "popup_text": {
+    "message": "Ci-dessous, vous pouvez personnaliser la durée du prochain compte à rebours."
+  },
+  "popup_button": {
+    "message": "Mettre à jour la durée"
+  }
+}

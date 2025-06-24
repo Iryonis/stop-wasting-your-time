@@ -1,0 +1,29 @@
+{
+  "redirect_title": {
+    "message": "SWYT - Redirect page"
+  },
+  "redirect_subtitle": {
+    "message": ""
+  },
+  "redirect_limit": {
+    "message": "You have exceeded your daily limit."
+  },
+  "redirect_click_1": {
+    "message": "Click "
+  },
+  "redirect_click_2": {
+    "message": "here"
+  },
+  "redirect_click_3": {
+    "message": " to close this tab."
+  },
+  "popup_title": {
+    "message": "SWYT - Popup"
+  },
+  "popup_text": {
+    "message": "Below, you can customize the duration for the next countdown!"
+  },
+  "popup_button": {
+    "message": "Update duration"
+  }
+}

@@ -14,3 +14,7 @@ cp src/*.js dist/
 # Copy assets
 mkdir -p dist/assets/fonts
 cp -r src/assets/fonts/* dist/assets/fonts/
+
+# Copy translations
+mkdir -p dist/_locales
+cp -r src/_locales/* dist/_locales/

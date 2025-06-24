@@ -3,6 +3,7 @@
   "name": "Stop Wasting Your Time",
   "version": "1.0",
   "description": "Redirige automatiquement les vidéos Shorts si activé.",
+  "default_locale": "en",
   "permissions": ["scripting", "tabs", "storage"],
   "host_permissions": ["*://www.youtube.com/*"],
   "background": {
