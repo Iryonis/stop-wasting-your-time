@@ -15,6 +15,7 @@ let countdownDefaultTime = 15 * 60; // Default value for the countdown in minute
 let countdownTime; // Current countdown time in minutes
 let displayUpdateInterval = null; // Display update interval
 let isActive = false; // to track if the countdown is active
+let isFinished = false; // to track if the countdown has finished
 
 /**
  * Format the slider value to the corresponding time in minutes, using a dictionary.
@@ -69,21 +70,29 @@ const startDisplayUpdate = () => {
 
       const display = document.getElementById("countdown-display");
 
-      if (status.countdownActive) {
+      if (status.isFinished) {
+        display.textContent = formatTimeFull(0);
+        display.classList.remove("opacity-100", "opacity-50");
+        display.style.color = "#95190C";
+        return;
+      } else if (status.countdownActive) {
         const timeText = formatTimeFull(status.countdownRemaining || 0);
         if (status.isPaused) {
           // If paused, reduce opacity to 0.5
           display.textContent = timeText;
+          display.classList.remove("opacity-100");
           display.classList.add("opacity-50");
         } else {
           // If active, put opacity to 1
           display.textContent = timeText;
-          display.classList.remove("opacity-100");
+          display.classList.add("opacity-100");
+          display.classList.remove("opacity-50");
         }
       } else {
         // If inactive, display the default time
         display.textContent = formatTimeFull(countdownTime * 60);
         stopDisplayUpdate();
+        isActive = false;
       }
     });
   }, 1000);
@@ -145,6 +154,12 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   chrome.runtime.sendMessage({ action: "getCountdownStatus" }, (status) => {
+    if (status && status.isFinished) {
+      isFinished = true;
+      display.textContent = formatTimeFull(0);
+      display.style.color = "#95190C";
+      return;
+    }
     if (status && status.countdownDuration) {
       countdownTime = status.countdownDuration;
       display.textContent = formatTimeFull(countdownTime);
@@ -169,8 +184,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Retrieve the value from the slider and format it to seconds
     countdownTime = formatTextFromSlider(Number(slider.value)) * 60; // In seconds
 
-    // If the countdown is not active, update the display with the formatted time
-    if (!isActive) {
+    // If the countdown is not active and not finished, update the display with the formatted time
+    if (!isActive && !isFinished) {
       const display = document.getElementById("countdown-display");
       display.textContent = formatTimeFull(countdownTime);
     }
@@ -188,9 +203,13 @@ document.addEventListener("DOMContentLoaded", () => {
    * This ensures that the popup reflects the current state of the countdown when opened.
    */
   chrome.runtime.sendMessage({ action: "getCountdownStatus" }, (status) => {
-    if (status && status.countdownActive) {
-      startDisplayUpdate();
-      isActive = true;
+    if (status && (status.countdownActive || status.isFinished)) {
+      if (status.isFinished) {
+        isFinished = true;
+      } else if (status.countdownActive) {
+        startDisplayUpdate();
+        isActive = true;
+      }
       const msg = chrome.i18n.getMessage("popup_button_next");
       if (msg) {
         updateButton.textContent = msg;

@@ -4,26 +4,28 @@
 
 let countdownInterval = null; // Interval for the countdown
 let countdownDefaultTime = 15 * 60; // Default value for the countdown in seconds
+let isFinished = false; // Flag to track if the countdown has finished
 
 /**
  * Calls the function 'handleTabChange' when the active tab changes.
  * This function checks the URL of the active tab and starts or pauses the countdown accordingly.
  */
 chrome.tabs.onActivated.addListener(async (activeInfo) => {
+  if (isFinished) return; // If the countdown has finished, do not handle tab changes
   const tab = await chrome.tabs.get(activeInfo.tabId);
   handleTabChange(tab.url);
 });
 
 /**
  * 1. Calls the function 'handleTabChange' when the tab is changed or updated.
- * It waits for the tab to be fully loaded before checking the URL.
+ * It waits for the tab to be fully loaded before checking the URL, and it checks if the countdown has finished.
  *
  * 2. If the URL contains "youtube.com" and the parameter 'redirectEnabled' (from chrome storage) is at 'true',
  * it injects the redirect script.
  */
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   // 1.
-  if (changeInfo.status === "complete") {
+  if (!isFinished && changeInfo.status === "complete") {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs[0] && tabs[0].id === tabId) {
         handleTabChange(tab.url);
@@ -53,8 +55,9 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
  * @param {string} url - The URL of the active tab
  */
 const handleTabChange = async (url) => {
+  if (isFinished) return; // If the countdown has finished, do not handle tab changes
   if (url && url.includes("youtube.com/shorts/")) {
-    console.log("YouTube Shorts - start the countdown");
+    console.log("On Shorts - start the countdown");
     await startOrResumeCountdown();
   } else {
     console.log("Not on Shorts - pause the countdown");
@@ -68,9 +71,11 @@ const handleTabChange = async (url) => {
  * 1. It checks if the countdown is active and if the last reset date matches today.
  *    If the last reset date does not match today, it resets the countdown and starts a new one.
  *
- * 2. If the countdown is active and has remaining time, it resumes the countdown.
+ * 2. If the countdown has already been finished during the day, it does nothing.
  *
- * 3. If the countdown is not active, it starts a new countdown with the duration set in storage.
+ * 3. If the countdown is active and has remaining time, it resumes the countdown.
+ *
+ * 4. If the countdown is not active, it starts a new countdown with the duration set in storage.
  * @returns {Promise<void>} - Starts (/and reset) or resumes the countdown based on the current state.
  */
 const startOrResumeCountdown = async () => {
@@ -78,6 +83,7 @@ const startOrResumeCountdown = async () => {
     "countdownActive",
     "countdownRemaining",
     "lastResetDate",
+    "isFinished",
   ]);
   const today = new Date().toDateString();
 
@@ -90,11 +96,14 @@ const startOrResumeCountdown = async () => {
   }
 
   // 2.
+  if (storage.isFinished) return;
+
+  // 3.
   if (storage.countdownActive && storage.countdownRemaining > 0) {
     await resumeCountdown();
     console.log("Resume");
   } else {
-    // 3.
+    // 4.
     await startNewCountdown();
     console.log("Start");
   }
@@ -116,6 +125,7 @@ const startNewCountdown = async () => {
     countdownDuration: duration,
     countdownRemaining: duration,
     isPaused: false,
+    isFinished: false,
     lastResetDate: new Date().toDateString(),
   });
 
@@ -189,6 +199,7 @@ const finishCountdown = async () => {
     countdownActive: false,
     countdownRemaining: 0,
     isPaused: false,
+    isFinished: true,
   });
 
   await chrome.storage.sync.set({ redirectEnabled: true });
@@ -212,8 +223,10 @@ const resetDailyCountdown = async () => {
     countdownActive: false,
     countdownRemaining: 0,
     isPaused: false,
+    isFinished: false,
     lastResetDate: new Date().toDateString(),
   });
+  isFinished = false;
 
   await chrome.storage.sync.set({ redirectEnabled: false });
   console.log("Countdown reset - redirection disabled");
@@ -222,8 +235,9 @@ const resetDailyCountdown = async () => {
 /**
  * Initializes the countdown.
  *
- * If the last reset date does not match today, it resets the countdown.
- * If the countdown is active and has remaining time, it starts the countdown ticker and pause it.
+ * 1. If the last reset date does not match today, it resets the countdown.
+ * 2. If the countdown has already been finished during the day, it does nothing.
+ * 3. If the countdown is active and has remaining time, it starts the countdown ticker and pause it.
  * @returns {Promise<void>} - Initializes the countdown by checking the last reset date and starting
  * the countdown if necessary.
  */
@@ -232,14 +246,19 @@ const initializeCountdown = async () => {
     "countdownActive",
     "countdownRemaining",
     "lastResetDate",
+    "isFinished",
   ]);
 
+  // 1.
   const today = new Date().toDateString();
   if (storage.lastResetDate !== today) {
     await resetDailyCountdown();
     return;
   }
+  // 2.
+  if (storage.isFinished) return;
 
+  // 3.
   if (storage.countdownActive && storage.countdownRemaining > 0) {
     await chrome.storage.local.set({ isPaused: true });
     startCountdownTicker();
@@ -262,6 +281,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           "countdownRemaining",
           "countdownDuration",
           "isPaused",
+          "isFinished",
         ],
         (data) => {
           sendResponse(data);
@@ -285,8 +305,10 @@ initializeCountdown().then(() => {
 
 /**
  * Checks the current active tab and handles the URL change.
+ * If the countdown has finished, it does not check the current tab.
  */
 const checkCurrentTab = async () => {
+  if (isFinished) return; // If the countdown has finished, do not check the current tab
   const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
   if (tabs[0]) {
     handleTabChange(tabs[0].url);

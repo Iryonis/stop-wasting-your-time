@@ -21,7 +21,7 @@
     "message": "SWYT - Popup"
   },
   "popup_text": {
-    "message": "Below, you can change the duration for the next countdown!"
+    "message": "Below, you can change the duration for the next countdown:"
   },
   "popup_button": {
     "message": "Update duration"
