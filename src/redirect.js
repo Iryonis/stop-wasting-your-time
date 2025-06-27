@@ -19,9 +19,11 @@ if (!window.shortsRedirectInjected) {
   };
 
   // Redirect on initial load
-  redirectIfShorts(window.location.href);
+  //redirectIfShorts(window.location.href);
 
   /**
+   * Redirect on URL change
+   *
    * Observe URL changes in the SPA
    * This is necessary for single-page applications (like YouTube)
    * where the URL may change without a full page reload.

@@ -133,38 +133,107 @@ document.addEventListener("DOMContentLoaded", () => {
   updateSliderText(slider, valueText);
 
   /**
-   * Retrieves the countdown duration selected by the user from storage and update the display and slider.
-   *
-   * If a countdown duration is found, it updates the display and slider to reflect the stored value.
-   * If no countdown duration is found, it uses the default countdown time.
-   * This is done to ensure that the countdown starts with the correct value when the popup is opened.
+   * Checks if it's a new day to reset the countdown.
+   * If it is a new day, it sends a message to the background script to reset the daily countdown, then loads the popup data.
+   * If it is not a new day, it loads the popup data normally.
    */
-  chrome.storage.sync.get(["countdownDurationNext"], (data) => {
-    if (data.countdownDurationNext) {
-      countdownTime = data.countdownDurationNext;
-      nextCountdown.textContent = formatTimeFull(countdownTime);
-      display.textContent = formatTimeFull(countdownTime);
-      const sliderVal =
-        Object.keys(sliderValues).find(
-          (key) => sliderValues[key] === countdownTime / 60
-        ) || 50;
-      slider.value = sliderVal;
-      updateSliderText(slider, valueText);
+  chrome.storage.local.get(["lastResetDate"], (data) => {
+    const today = new Date().toDateString();
+    if (data.lastResetDate !== today) {
+      chrome.runtime.sendMessage({ action: "resetDailyCountdown" }, () => {
+        console.log("Reset from popup");
+        loadPopupData();
+      });
+    } else {
+      loadPopupData();
     }
   });
 
-  chrome.runtime.sendMessage({ action: "getCountdownStatus" }, (status) => {
-    if (status && status.isFinished) {
-      isFinished = true;
-      display.textContent = formatTimeFull(0);
-      display.style.color = "#95190C";
-      return;
-    }
-    if (status && status.countdownDuration) {
-      countdownTime = status.countdownDuration;
-      display.textContent = formatTimeFull(countdownTime);
-    }
-  });
+  /**
+   * Function that handles loading the popup data.
+   */
+  const loadPopupData = () => {
+    /**
+     * Retrieves the countdown duration selected by the user from storage and update the display and slider.
+     *
+     * If a countdown duration is found, it updates the display and slider to reflect the stored value.
+     * If no countdown duration is found, it uses the default countdown time.
+     * This is done to ensure that the countdown starts with the correct value when the popup is opened.
+     */
+    chrome.storage.sync.get(["countdownDurationNext"], (data) => {
+      if (data.countdownDurationNext) {
+        countdownTime = data.countdownDurationNext;
+        nextCountdown.textContent = formatTimeFull(countdownTime);
+        display.textContent = formatTimeFull(countdownTime);
+        const sliderVal =
+          Object.keys(sliderValues).find(
+            (key) => sliderValues[key] === countdownTime / 60
+          ) || 50;
+        slider.value = sliderVal;
+        updateSliderText(slider, valueText);
+      }
+    });
+
+    /**
+     * Retrieves the current status from local storage and updates the display accordingly.
+     * 1. If the countdown is finished, it sets the display to "00:00:00", changes the text color to red,
+     * the button text to "popup_button_next" and calls `stopDisplayUpdate`.
+     *
+     * 2. If the countdown is active, it starts the display update interval and changes the button text to
+     * "popup_button_next".
+     *
+     * 3. If a countdown duration is found, it updates the display with the formatted time.
+     *
+     * 4. It also checks if the countdown is paused and updates the display opacity accordingly.
+     *
+     * 5. If the countdown is not active, it stops the display update interval and resets the flags.
+     */
+    chrome.storage.local.get(
+      ["countdownRemaining", "isFinished", "countdownActive", "isPaused"],
+      (data) => {
+        if (data) {
+          // 1.
+          if (data.isFinished) {
+            isFinished = true;
+            display.textContent = formatTimeFull(0);
+            display.style.color = "#95190C";
+            const msg = chrome.i18n.getMessage("popup_button_next");
+            if (msg) {
+              updateButton.textContent = msg;
+            }
+            stopDisplayUpdate();
+            return;
+            // 2.
+          } else if (data.countdownActive) {
+            startDisplayUpdate();
+            isActive = true;
+            const msg = chrome.i18n.getMessage("popup_button_next");
+            if (msg) {
+              updateButton.textContent = msg;
+            }
+            // 3.
+            if (data.countdownRemaining) {
+              countdownTime = data.countdownRemaining;
+              display.textContent = formatTimeFull(countdownTime);
+            }
+            // 4.
+            if (data.isPaused) {
+              display.classList.add("opacity-50");
+              display.classList.remove("opacity-100");
+            } else {
+              display.classList.add("opacity-100");
+              display.classList.remove("opacity-50");
+            }
+            // 5.
+          } else {
+            isActive = false;
+            isFinished = false;
+            stopDisplayUpdate();
+          }
+        }
+      }
+    );
+  };
 
   slider.addEventListener("input", (event) => {
     updateSliderText(slider, valueText);
@@ -186,7 +255,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // If the countdown is not active and not finished, update the display with the formatted time
     if (!isActive && !isFinished) {
-      const display = document.getElementById("countdown-display");
       display.textContent = formatTimeFull(countdownTime);
     }
 
@@ -194,28 +262,5 @@ document.addEventListener("DOMContentLoaded", () => {
     nextCountdown.textContent = formatTimeFull(countdownTime);
     // Save the new countdown time to storage
     chrome.storage.sync.set({ countdownDurationNext: countdownTime });
-  });
-
-  /**
-   * Checks the current countdown status from the background script.
-   * If the countdown is active, it starts the display update interval and updates the button text.
-   * If the countdown is not active, it stops the display update interval.
-   * This ensures that the popup reflects the current state of the countdown when opened.
-   */
-  chrome.runtime.sendMessage({ action: "getCountdownStatus" }, (status) => {
-    if (status && (status.countdownActive || status.isFinished)) {
-      if (status.isFinished) {
-        isFinished = true;
-      } else if (status.countdownActive) {
-        startDisplayUpdate();
-        isActive = true;
-      }
-      const msg = chrome.i18n.getMessage("popup_button_next");
-      if (msg) {
-        updateButton.textContent = msg;
-      }
-    } else {
-      stopDisplayUpdate();
-    }
   });
 });

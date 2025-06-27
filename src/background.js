@@ -271,22 +271,23 @@ const initializeCountdown = async () => {
  *
  * 'getCountdownStatus' action retrieves the current countdown status from local storage
  * and sends it back to the sender.
+ * 'resetDailyCountdown' action resets the daily countdown and sends a success response.
+ * 'closeCurrentTab' action closes the current tab from which the message was sent.
  */
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.action) {
     case "getCountdownStatus":
       chrome.storage.local.get(
-        [
-          "countdownActive",
-          "countdownRemaining",
-          "countdownDuration",
-          "isPaused",
-          "isFinished",
-        ],
+        ["countdownActive", "countdownRemaining", "isPaused", "isFinished"],
         (data) => {
           sendResponse(data);
         }
       );
+      return true;
+    case "resetDailyCountdown":
+      resetDailyCountdown().then(() => {
+        sendResponse({ success: true });
+      });
       return true;
     case "closeCurrentTab":
       if (sender.tab && sender.tab.id) {
