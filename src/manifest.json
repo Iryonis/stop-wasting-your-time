@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
   "name": "Stop Wasting Your Time",
+  "short_name": "SWYT",
   "version": "1.0",
-  "description": "Redirige automatiquement les vidéos Shorts si activé.",
+  "description": "__MSG_extension_description__",
   "default_locale": "en",
   "permissions": ["scripting", "tabs", "storage"],
   "host_permissions": ["*://www.youtube.com/*"],

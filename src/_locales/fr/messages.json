@@ -1,4 +1,7 @@
 {
+  "extension_description": {
+    "message": "Limite le temps que vous passez à visionner des YouTube Shorts."
+  },
   "redirect_title": {
     "message": "SWYT - Page de redirection"
   },
