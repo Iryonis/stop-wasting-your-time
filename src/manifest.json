@@ -3,6 +3,11 @@
   "name": "Stop Wasting Your Time",
   "short_name": "SWYT",
   "version": "1.0",
+  "icons": {
+    "16": "assets/favicons/favicon-16x16.png",
+    "32": "assets/favicons/favicon-32x32.png",
+    "192": "assets/favicons/favicon-192x192.png"
+  },
   "description": "__MSG_extension_description__",
   "default_locale": "en",
   "permissions": ["scripting", "tabs", "storage"],

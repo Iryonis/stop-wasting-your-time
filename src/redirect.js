@@ -7,6 +7,16 @@ if (!window.shortsRedirectInjected) {
   window.shortsRedirectInjected = true;
 
   /**
+   * Extracts the short ID from a YouTube Shorts URL.
+   * @param {string} url - The YouTube Shorts URL to extract the short ID from.
+   * @returns {string|null} - The extracted short ID or null if not found
+   */
+  const extractShortId = (url) => {
+    const match = url.match(/\/shorts\/([^/?]+)/);
+    return match ? match[1] : null;
+  };
+
+  /**
    * Redirects to the redirect page if the URL contains "/shorts/".
    * @param {string} url - The current URL to check for "/shorts/"
    */
@@ -14,12 +24,13 @@ if (!window.shortsRedirectInjected) {
     if (url.includes("/shorts/")) {
       const extensionId = chrome.runtime.id;
       const redirectUrl = `chrome-extension://${extensionId}/redirect.html`;
-      window.location.href = redirectUrl;
+      /**
+       * Replace the current history entry instead of adding a new one.
+       * It prevents the user from going back to the Shorts URL.
+       */
+      window.location.replace(redirectUrl);
     }
   };
-
-  // Redirect on initial load
-  //redirectIfShorts(window.location.href);
 
   /**
    * Redirect on URL change
@@ -29,11 +40,21 @@ if (!window.shortsRedirectInjected) {
    * where the URL may change without a full page reload.
    */
   let lastUrl = location.href;
-  new MutationObserver(() => {
+  let lastShortId = extractShortId(lastUrl);
+
+  const urlWatcher = setInterval(() => {
     const currentUrl = location.href;
-    if (currentUrl !== lastUrl) {
+    const currentShortId = extractShortId(currentUrl);
+
+    if (currentUrl !== lastUrl || currentShortId !== lastShortId) {
       lastUrl = currentUrl;
+      lastShortId = currentShortId;
       redirectIfShorts(currentUrl);
     }
-  }).observe(document, { subtree: true, childList: true });
+  }, 500); // Check every 500 milliseconds
+
+  // Clean up on unload
+  window.addEventListener("beforeunload", () => {
+    clearInterval(urlWatcher);
+  });
 }

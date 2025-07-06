@@ -14,6 +14,8 @@ cp src/*.js dist/
 # Copy assets
 mkdir -p dist/assets/fonts
 cp -r src/assets/fonts/* dist/assets/fonts/
+mkdir -p dist/assets/favicons
+cp -r src/assets/favicons/* dist/assets/favicons/
 
 # Copy translations
 mkdir -p dist/_locales
