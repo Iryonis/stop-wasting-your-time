@@ -22,8 +22,8 @@ if (!window.shortsRedirectInjected) {
    */
   const redirectIfShorts = (url) => {
     if (url.includes("/shorts/")) {
-      const extensionId = chrome.runtime.id;
-      const redirectUrl = `chrome-extension://${extensionId}/redirect.html`;
+      const redirectUrl = chrome.runtime.getURL("redirect.html");
+
       /**
        * Replace the current history entry instead of adding a new one.
        * It prevents the user from going back to the Shorts URL.
