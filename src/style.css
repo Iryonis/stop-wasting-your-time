@@ -4,7 +4,7 @@
 
 @font-face {
   font-family: "Signika";
-  src: url("./assets/fonts/Signika.ttf") format("truetype");
+  src: url("./assets/fonts/Signika.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
 }
