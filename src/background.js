@@ -25,7 +25,7 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
  */
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   // 1.
-  if (!isFinished && changeInfo.status === "complete") {
+  if (changeInfo.status === "complete") {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs[0] && tabs[0].id === tabId) {
         handleTabChange(tab.url);
@@ -96,7 +96,7 @@ const startOrResumeCountdown = async () => {
   }
 
   // 2.
-  if (storage.isFinished) return;
+  if (storage.isFinished) return; // If the countdown has already been finished during the day, do nothing
 
   // 3.
   if (storage.countdownActive && storage.countdownRemaining > 0) {
@@ -201,6 +201,7 @@ const finishCountdown = async () => {
     isPaused: false,
     isFinished: true,
   });
+  isFinished = true;
 
   await chrome.storage.sync.set({ redirectEnabled: true });
   console.log("Countdown finished - redirection enabled");
@@ -256,7 +257,10 @@ const initializeCountdown = async () => {
     return;
   }
   // 2.
-  if (storage.isFinished) return;
+  if (storage.isFinished) {
+    isFinished = true;
+    return;
+  }
 
   // 3.
   if (storage.countdownActive && storage.countdownRemaining > 0) {

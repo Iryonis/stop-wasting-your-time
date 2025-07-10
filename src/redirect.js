@@ -22,15 +22,34 @@ if (!window.shortsRedirectInjected) {
    */
   const redirectIfShorts = (url) => {
     if (url.includes("/shorts/")) {
-      const redirectUrl = chrome.runtime.getURL("redirect.html");
-
-      /**
-       * Replace the current history entry instead of adding a new one.
-       * It prevents the user from going back to the Shorts URL.
-       */
-      window.location.replace(redirectUrl);
+      try {
+        const redirectUrl = chrome.runtime.getURL("redirect.html");
+        /**
+         * Replace the current history entry instead of adding a new one.
+         * It prevents the user from going back to the Shorts URL.
+         */
+        window.location.replace(redirectUrl);
+      } catch (error) {
+        console.log("Redirect failed:", error.message);
+      }
     }
   };
+
+  /**
+   * Checks the initial navigation and redirects if necessary.
+   * This function is called immediately when the script is loaded.
+   *
+   * If the user is currently watching a Shorts, it will not redirect but if he came from another page
+   * (like YouTube homepage), it will redirect.
+   */
+  const checkInitialNavigation = () => {
+    // If the document referrer does not include "/shorts/", redirect immediately
+    if (document.referrer && !document.referrer.includes("/shorts/")) {
+      redirectIfShorts(location.href);
+    }
+  };
+
+  checkInitialNavigation();
 
   /**
    * Redirect on URL change
