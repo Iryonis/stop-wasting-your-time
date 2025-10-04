@@ -4,15 +4,19 @@ A Chrome web extension to limit the time spent watching YouTube Shorts.
 
 ## Installation
 
+### [Soon] On Chrome Web Store
+
+...
+
 ### With a Git pull
 
 1. Pull the latest version of the project.
-2. Execute the command 'npm -i' to install required components.
-3. Execute the Bash script 'build.sh'.
-4. Go to the address `chrome://extensions/`.
-5. Check 'Developer mode' in the upper right corner.
-6. Click on the 'Load unpacked extension' button in the upper left corner.
-7. Select the 'dist' folder.
+2. Execute the command `npm install` to install required components.
+3. Execute the build command `npm run build`.
+4. Go to the address '**chrome://extensions/** */'.
+5. Check '**Developer mode**' in the upper right corner.
+6. Click on the '**Load unpacked extension**' button in the upper left corner.
+7. Select the '**dist**' folder.
 8. (Optional) Enjoy!
 
 ## Contributing
@@ -27,4 +31,4 @@ Please note that this is my first web extension and that English is not my first
 
 ## Credits
 
-Created by Iryon.
+Created by [Iryon](https://github.com/Iryonis).
