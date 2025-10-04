@@ -134,12 +134,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /**
    * Checks if it's a new day to reset the countdown.
-   * If it is a new day, it sends a message to the background script to reset the daily countdown, then loads the popup data.
+   * If it is a new day and it is after 3 AM, it sends a message to the background script to reset the daily countdown, then loads the popup data.
    * If it is not a new day, it loads the popup data normally.
    */
   chrome.storage.local.get(["lastResetDate"], (data) => {
-    const today = new Date().toDateString();
-    if (data.lastResetDate !== today) {
+    const today = new Date();
+    if (data.lastResetDate !== today.toDateString() && today.getHours() >= 3) {
       chrome.runtime.sendMessage({ action: "resetDailyCountdown" }, () => {
         console.log("Reset from popup");
         loadPopupData();

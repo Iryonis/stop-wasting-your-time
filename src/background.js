@@ -66,27 +66,10 @@ const handleTabChange = async (url) => {
 };
 
 /**
- * Listens for focus changes in Chrome windows to pause or resume the countdown.
- * If the user switches away from Chrome, the countdown is paused.
- * If the user returns to Chrome, the countdown is resumed.
- */
-chrome.windows.onFocusChanged.addListener((windowId) => {
-  if (isFinished) return;
-  
-  if (windowId === chrome.windows.WINDOW_ID_NONE) {
-    console.log("👋 User left Chrome - pausing countdown");
-    pauseCountdown();
-  } else {
-    console.log("👀 User returned to Chrome - resuming countdown");
-    resumeCountdown();
-  }
-});
-
-/**
  * Handles the start, resume, or reset of the countdown based on the current state.
  *
  * 1. It checks if the countdown is active and if the last reset date matches today.
- *    If the last reset date does not match today, it resets the countdown and starts a new one.
+ *    If the last reset date does not match today and it is after 3 AM, it resets the countdown and starts a new one.
  *
  * 2. If the countdown has already been finished during the day, it does nothing.
  *
@@ -102,10 +85,10 @@ const startOrResumeCountdown = async () => {
     "lastResetDate",
     "isFinished",
   ]);
-  const today = new Date().toDateString();
+  const today = new Date();
 
   // 1.
-  if (storage.lastResetDate !== today) {
+  if (storage.lastResetDate !== today.toDateString() && today.getHours() >= 3) {
     await resetDailyCountdown();
     await startNewCountdown();
     console.log("Reset + start");
@@ -253,7 +236,7 @@ const resetDailyCountdown = async () => {
 /**
  * Initializes the countdown.
  *
- * 1. If the last reset date does not match today, it resets the countdown.
+ * 1. If the last reset date does not match today and it is after 3 AM, it resets the countdown.
  * 2. If the countdown has already been finished during the day, it does nothing.
  * 3. If the countdown is active and has remaining time, it starts the countdown ticker and pause it.
  * @returns {Promise<void>} - Initializes the countdown by checking the last reset date and starting
@@ -268,8 +251,8 @@ const initializeCountdown = async () => {
   ]);
 
   // 1.
-  const today = new Date().toDateString();
-  if (storage.lastResetDate !== today) {
+  const today = new Date();
+  if (storage.lastResetDate !== today.toDateString() && today.getHours() >= 3) {
     await resetDailyCountdown();
     return;
   }
