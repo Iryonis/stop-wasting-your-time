@@ -30,7 +30,7 @@ if (!window.shortsRedirectInjected) {
          */
         window.location.replace(redirectUrl);
       } catch (error) {
-        console.log("Redirect failed:", error.message);
+        console.error("Redirect failed:", error.message);
       }
     }
   };

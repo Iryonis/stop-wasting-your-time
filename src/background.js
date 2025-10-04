@@ -41,7 +41,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
               target: { tabId: tabId },
               files: ["redirect.js"],
             })
-            .catch((err) => console.log("Injection error (onUpdated):", err));
+            .catch((err) => console.error("Injection error (onUpdated):", err));
         }
       });
     }
@@ -57,10 +57,8 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 const handleTabChange = async (url) => {
   if (isFinished) return; // If the countdown has finished, do not handle tab changes
   if (url && url.includes("youtube.com/shorts/")) {
-    console.log("On Shorts - start the countdown");
     await startOrResumeCountdown();
   } else {
-    console.log("Not on Shorts - pause the countdown");
     await pauseCountdown();
   }
 };
@@ -91,7 +89,6 @@ const startOrResumeCountdown = async () => {
   if (storage.lastResetDate !== today.toDateString() && today.getHours() >= 3) {
     await resetDailyCountdown();
     await startNewCountdown();
-    console.log("Reset + start");
     return;
   }
 
@@ -101,11 +98,9 @@ const startOrResumeCountdown = async () => {
   // 3.
   if (storage.countdownActive && storage.countdownRemaining > 0) {
     await resumeCountdown();
-    console.log("Resume");
   } else {
     // 4.
     await startNewCountdown();
-    console.log("Start");
   }
 };
 
@@ -130,7 +125,6 @@ const startNewCountdown = async () => {
   });
 
   startCountdownTicker();
-  console.log(`New countdown: ${duration / 60} minutes`);
 };
 
 /**
@@ -167,7 +161,6 @@ const startCountdownTicker = () => {
  */
 const pauseCountdown = async () => {
   await chrome.storage.local.set({ isPaused: true });
-  console.log("Countdown paused.");
 };
 
 /**
@@ -179,7 +172,6 @@ const resumeCountdown = async () => {
   if (!countdownInterval) {
     startCountdownTicker();
   }
-  console.log("Countdown resumed.");
 };
 
 /**
@@ -204,7 +196,6 @@ const finishCountdown = async () => {
   isFinished = true;
 
   await chrome.storage.sync.set({ redirectEnabled: true });
-  console.log("Countdown finished - redirection enabled");
 
   activateRedirectionOnExistingTabs();
 };
@@ -230,7 +221,6 @@ const resetDailyCountdown = async () => {
   isFinished = false;
 
   await chrome.storage.sync.set({ redirectEnabled: false });
-  console.log("Countdown reset - redirection disabled");
 };
 
 /**
@@ -266,7 +256,6 @@ const initializeCountdown = async () => {
   if (storage.countdownActive && storage.countdownRemaining > 0) {
     await chrome.storage.local.set({ isPaused: true });
     startCountdownTicker();
-    console.log("Countdown initialized and paused.");
   }
 };
 
@@ -333,7 +322,7 @@ const activateRedirectionOnExistingTabs = () => {
           files: ["redirect.js"],
         })
         .catch((err) =>
-          console.log(
+          console.error(
             "Injection error (activateRedirectionOnExistingTabs):",
             err
           )

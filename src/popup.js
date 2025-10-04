@@ -141,7 +141,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const today = new Date();
     if (data.lastResetDate !== today.toDateString() && today.getHours() >= 3) {
       chrome.runtime.sendMessage({ action: "resetDailyCountdown" }, () => {
-        console.log("Reset from popup");
         loadPopupData();
       });
     } else {

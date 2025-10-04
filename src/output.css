@@ -107,7 +107,7 @@
 }
 
 /*
-! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com
+! tailwindcss v3.4.18 | MIT License | https://tailwindcss.com
 */
 
 /*
@@ -554,6 +554,18 @@ video {
   display: none;
 }
 
+.absolute {
+  position: absolute;
+}
+
+.bottom-4 {
+  bottom: 1rem;
+}
+
+.right-4 {
+  right: 1rem;
+}
+
 .m-6 {
   margin: 1.5rem;
 }
@@ -580,32 +592,30 @@ video {
   margin-left: 2.5rem;
 }
 
-.ml-40 {
-  margin-left: 10rem;
-}
-
-.mr-40 {
-  margin-right: 10rem;
+.mr-10 {
+  margin-right: 2.5rem;
 }
 
 .mt-4 {
   margin-top: 1rem;
 }
 
-.ml-32 {
-  margin-left: 8rem;
-}
-
-.mr-32 {
-  margin-right: 8rem;
-}
-
-.mr-10 {
-  margin-right: 2.5rem;
+.inline {
+  display: inline;
 }
 
 .flex {
   display: flex;
+}
+
+.size-6 {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.size-4 {
+  width: 1rem;
+  height: 1rem;
 }
 
 .h-\[440px\] {
@@ -634,6 +644,21 @@ video {
 
 .w-screen {
   width: 100vw;
+}
+
+.-translate-y-8 {
+  --tw-translate-y: -2rem;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.-translate-y-2 {
+  --tw-translate-y: -0.5rem;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.-translate-y-1 {
+  --tw-translate-y: -0.25rem;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
 .flex-col {
@@ -746,11 +771,6 @@ video {
   line-height: 2.25rem;
 }
 
-.text-4xl {
-  font-size: 2.25rem;
-  line-height: 2.5rem;
-}
-
 .text-6xl {
   font-size: 3.75rem;
   line-height: 1;
@@ -764,11 +784,6 @@ video {
 .text-sm {
   font-size: 0.875rem;
   line-height: 1.25rem;
-}
-
-.text-7xl {
-  font-size: 4.5rem;
-  line-height: 1;
 }
 
 .font-bold {
@@ -827,7 +842,7 @@ video {
 @font-face {
   font-family: "Signika";
 
-  src: url("./assets/fonts/Signika.ttf") format("truetype");
+  src: url("./assets/fonts/Signika.woff2") format("woff2");
 
   font-weight: 700;
 
@@ -858,12 +873,12 @@ video {
 }
 
 @media (min-width: 1024px) {
-  .lg\:mr-32 {
-    margin-right: 8rem;
-  }
-
   .lg\:ml-32 {
     margin-left: 8rem;
+  }
+
+  .lg\:mr-32 {
+    margin-right: 8rem;
   }
 
   .lg\:text-3xl {
@@ -886,13 +901,13 @@ video {
     margin-right: 10rem;
   }
 
-  .xl\:text-8xl {
-    font-size: 6rem;
-    line-height: 1;
-  }
-
   .xl\:text-4xl {
     font-size: 2.25rem;
     line-height: 2.5rem;
+  }
+
+  .xl\:text-8xl {
+    font-size: 6rem;
+    line-height: 1;
   }
 }
