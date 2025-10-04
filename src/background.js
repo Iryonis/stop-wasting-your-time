@@ -66,6 +66,23 @@ const handleTabChange = async (url) => {
 };
 
 /**
+ * Listens for focus changes in Chrome windows to pause or resume the countdown.
+ * If the user switches away from Chrome, the countdown is paused.
+ * If the user returns to Chrome, the countdown is resumed.
+ */
+chrome.windows.onFocusChanged.addListener((windowId) => {
+  if (isFinished) return;
+  
+  if (windowId === chrome.windows.WINDOW_ID_NONE) {
+    console.log("👋 User left Chrome - pausing countdown");
+    pauseCountdown();
+  } else {
+    console.log("👀 User returned to Chrome - resuming countdown");
+    resumeCountdown();
+  }
+});
+
+/**
  * Handles the start, resume, or reset of the countdown based on the current state.
  *
  * 1. It checks if the countdown is active and if the last reset date matches today.
