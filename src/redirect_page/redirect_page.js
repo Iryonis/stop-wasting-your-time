@@ -1,5 +1,5 @@
 /**
- *  Script to handle the redirection page.
+ *  Script for the redirection page.
  */
 
 document.addEventListener("DOMContentLoaded", () => {

@@ -1,5 +1,8 @@
 /**
- * Redirect script for the extension.
+ * Redirect - Enable the redirection to the redirect page
+ *
+ * Content script that redirects the user to a custom redirect page
+ * when they navigate to a YouTube Shorts URL.
  */
 
 // Prevent multiple injections

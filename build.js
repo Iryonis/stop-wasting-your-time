@@ -9,8 +9,8 @@ fs.mkdirSync("dist");
 
 // 2. Copy static files
 fs.copyFileSync("src/manifest.json", "dist/manifest.json");
-fs.copyFileSync("src/popup.html", "dist/popup.html");
-fs.copyFileSync("src/redirect.html", "dist/redirect.html");
+fs.copyFileSync("src/popup/popup.html", "dist/popup.html");
+fs.copyFileSync("src/redirect_page/redirect.html", "dist/redirect.html");
 
 // 3. Copy assets
 fs.mkdirSync("dist/assets", { recursive: true });
@@ -27,16 +27,17 @@ fs.cpSync("src/_locales", "dist/_locales", { recursive: true });
 esbuild.buildSync({
   entryPoints: [
     "src/background.js",
-    "src/popup.js",
-    "src/redirect.js",
-    "src/redirect_page.js",
+    "src/popup/popup.js",
+    "src/content_scripts/redirect.js",
+    "src/content_scripts/video_checker.js",
+    "src/redirect_page/redirect_page.js",
     "src/i18n.js",
-    "src/video_checker.js",
   ],
   outdir: "dist",
+  entryNames: "[name]",
   bundle: true,
   minify: true,
-  target: ["chrome114"],
+  target: ["chrome120"],
 });
 
 // 6. Compile Tailwind CSS
