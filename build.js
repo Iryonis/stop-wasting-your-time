@@ -31,6 +31,7 @@ esbuild.buildSync({
     "src/redirect.js",
     "src/redirect_page.js",
     "src/i18n.js",
+    "src/video_checker.js",
   ],
   outdir: "dist",
   bundle: true,

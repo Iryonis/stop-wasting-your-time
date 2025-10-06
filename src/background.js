@@ -1,73 +1,79 @@
 /**
  * Background script for the extension.
  */
+const countdownDefaultTime = 15 * 60; // Default value for the countdown in seconds
+const resetHour = 3; // Hour of the day when the countdown resets (3 AM)
 
 let countdownInterval = null; // Interval for the countdown
-let countdownDefaultTime = 15 * 60; // Default value for the countdown in seconds
 let isFinished = false; // Flag to track if the countdown has finished
 
 /**
- * Calls the function 'handleTabChange' when the active tab changes.
- * This function checks the URL of the active tab and starts or pauses the countdown accordingly.
- */
-chrome.tabs.onActivated.addListener(async (activeInfo) => {
-  if (isFinished) return; // If the countdown has finished, do not handle tab changes
-  const tab = await chrome.tabs.get(activeInfo.tabId);
-  handleTabChange(tab.url);
-});
-
-/**
- * 1. Calls the function 'handleTabChange' when the tab is changed or updated.
- * It waits for the tab to be fully loaded before checking the URL, and it checks if the countdown has finished.
+ * 1. Calls the function {@link handleCountdownState} with 'false' argument when the user leaves a Short tab.
+ * It waits for the tab to be fully loaded before checking the URL.
  *
- * 2. If the URL contains "youtube.com" and the parameter 'redirectEnabled' (from chrome storage) is at 'true',
- * it injects the redirect script.
+ * 2. If the URL contains "www.youtube.com" and the countdown HAS finished it injects the redirect script.
+ *
+ * 3. If the URL contains "www.youtube.com/shorts/" and the countdown HAS NOT finished, it injects the video checker script.
  */
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   // 1.
   if (changeInfo.status === "complete") {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs[0] && tabs[0].id === tabId) {
-        handleTabChange(tab.url);
+        // Only handle if the new tab isn't a Shorts tab
+        if (!tab.url || !tab.url.includes("www.youtube.com/shorts/")) {
+          handleCountdownState(false);
+        }
       }
     });
 
     // 2.
-    if (tab.url && tab.url.includes("youtube.com")) {
-      chrome.storage.sync.get(["redirectEnabled"], (data) => {
-        if (data.redirectEnabled) {
-          chrome.scripting
-            .executeScript({
-              target: { tabId: tabId },
-              files: ["redirect.js"],
-            })
-            .catch((err) => console.error("Injection error (onUpdated):", err));
-        }
-      });
+    if (isFinished) {
+      if (tab.url && tab.url.includes("www.youtube.com")) {
+        chrome.scripting
+          .executeScript({
+            target: { tabId: tabId },
+            files: ["redirect.js"],
+          })
+          .catch((err) =>
+            console.error("Injection error onUpdated -> redirect:", err)
+          );
+      }
+    } else {
+      if (tab.url && tab.url.includes("www.youtube.com/shorts/")) {
+        // 3.
+        chrome.scripting
+          .executeScript({
+            target: { tabId: tabId },
+            files: ["video_checker.js"],
+          })
+          .catch((err) =>
+            console.error("Injection error onUpdated -> video_checker:", err)
+          );
+      }
     }
   }
 });
 
 /**
- * Handles the change of the active tab.
- * If the URL contains "youtube.com/shorts/", it starts or resumes the countdown.
- * If the URL does not contain "youtube.com/shorts/", it pauses the countdown.
- * @param {string} url - The URL of the active tab
+ * Handles the state of the countdown.
+ * If the countdown has finished, it does nothing.
+ * If the given paramemter is true, it starts or resumes the countdown.
+ * If false, it pauses the countdown.
+ *
+ * @param {boolean} test - A boolean indicating whether to start/resume (true) or pause (false) the countdown.
  */
-const handleTabChange = async (url) => {
-  if (isFinished) return; // If the countdown has finished, do not handle tab changes
-  if (url && url.includes("youtube.com/shorts/")) {
-    await startOrResumeCountdown();
-  } else {
-    await pauseCountdown();
-  }
+const handleCountdownState = async (test) => {
+  if (isFinished) return; // If the countdown has finished, do nothing
+  if (test) await startOrResumeCountdown();
+  else await pauseCountdown();
 };
 
 /**
  * Handles the start, resume, or reset of the countdown based on the current state.
  *
  * 1. It checks if the countdown is active and if the last reset date matches today.
- *    If the last reset date does not match today and it is after 3 AM, it resets the countdown and starts a new one.
+ *    If the last reset date does not match today and it is after {@link resetHour} AM, it resets the countdown and starts a new one.
  *
  * 2. If the countdown has already been finished during the day, it does nothing.
  *
@@ -86,7 +92,10 @@ const startOrResumeCountdown = async () => {
   const today = new Date();
 
   // 1.
-  if (storage.lastResetDate !== today.toDateString() && today.getHours() >= 3) {
+  if (
+    storage.lastResetDate !== today.toDateString() &&
+    today.getHours() >= resetHour
+  ) {
     await resetDailyCountdown();
     await startNewCountdown();
     return;
@@ -226,7 +235,7 @@ const resetDailyCountdown = async () => {
 /**
  * Initializes the countdown.
  *
- * 1. If the last reset date does not match today and it is after 3 AM, it resets the countdown.
+ * 1. If the last reset date does not match today and it is after {@link resetHour} AM, it resets the countdown.
  * 2. If the countdown has already been finished during the day, it does nothing.
  * 3. If the countdown is active and has remaining time, it starts the countdown ticker and pause it.
  * @returns {Promise<void>} - Initializes the countdown by checking the last reset date and starting
@@ -242,7 +251,10 @@ const initializeCountdown = async () => {
 
   // 1.
   const today = new Date();
-  if (storage.lastResetDate !== today.toDateString() && today.getHours() >= 3) {
+  if (
+    storage.lastResetDate !== today.toDateString() &&
+    today.getHours() >= resetHour
+  ) {
     await resetDailyCountdown();
     return;
   }
@@ -262,13 +274,17 @@ const initializeCountdown = async () => {
 /**
  * Listens for messages from the popup or other parts of the extension.
  *
+ * 'videoStateChanged' action calls the function {@link handleCountdownState} with the 'isPlaying' parameter.
  * 'getCountdownStatus' action retrieves the current countdown status from local storage
  * and sends it back to the sender.
- * 'resetDailyCountdown' action resets the daily countdown and sends a success response.
+ * 'resetDailyCountdown' action resets the daily countdown {@link resetDailyCountdown} and sends a success response.
  * 'closeCurrentTab' action closes the current tab from which the message was sent.
  */
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.action) {
+    case "videoStateChanged":
+      handleCountdownState(message.isPlaying);
+      break;
     case "getCountdownStatus":
       chrome.storage.local.get(
         ["countdownActive", "countdownRemaining", "isPaused", "isFinished"],
@@ -291,23 +307,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 /**
- * Initializes the countdown and checks the current tab.
+ * Initializes the countdown.
  */
-initializeCountdown().then(() => {
-  checkCurrentTab();
-});
-
-/**
- * Checks the current active tab and handles the URL change.
- * If the countdown has finished, it does not check the current tab.
- */
-const checkCurrentTab = async () => {
-  if (isFinished) return; // If the countdown has finished, do not check the current tab
-  const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (tabs[0]) {
-    handleTabChange(tabs[0].url);
-  }
-};
+initializeCountdown();
 
 /**
  * Activates the redirection script on all existing YouTube tabs.

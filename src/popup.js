@@ -2,8 +2,10 @@
  * Script for the popup of the extension.
  */
 
+const countdownDefaultTime = 15 * 60; // Default value for the countdown in minutes
+const resetHour = 3; // Hour of the day when the countdown resets (3 AM)
 // Dictionary for slider values
-let sliderValues = {
+const sliderValues = {
   0: 0.2,
   25: 15,
   50: 30,
@@ -11,7 +13,6 @@ let sliderValues = {
   100: 120,
 };
 
-let countdownDefaultTime = 15 * 60; // Default value for the countdown in minutes
 let countdownTime; // Current countdown time in minutes
 let displayUpdateInterval = null; // Display update interval
 let isActive = false; // to track if the countdown is active
@@ -134,12 +135,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /**
    * Checks if it's a new day to reset the countdown.
-   * If it is a new day and it is after 3 AM, it sends a message to the background script to reset the daily countdown, then loads the popup data.
+   * If it is a new day and it is after {@link resetHour} AM, it sends a message to the background script to reset the daily countdown, then loads the popup data.
    * If it is not a new day, it loads the popup data normally.
    */
   chrome.storage.local.get(["lastResetDate"], (data) => {
     const today = new Date();
-    if (data.lastResetDate !== today.toDateString() && today.getHours() >= 3) {
+    if (
+      data.lastResetDate !== today.toDateString() &&
+      today.getHours() >= resetHour
+    ) {
       chrome.runtime.sendMessage({ action: "resetDailyCountdown" }, () => {
         loadPopupData();
       });
