@@ -38,15 +38,6 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
           .catch((err) =>
             console.error("Injection error onUpdated -> redirect:", err)
           );
-        // SHORTS HIDER
-        chrome.scripting
-          .executeScript({
-            target: { tabId: tabId },
-            files: ["shorts_hider.js"],
-          })
-          .catch((err) =>
-            console.error("Injection error onUpdated -> shorts_hider:", err)
-          );
       }
     } else {
       if (tab.url && tab.url.includes("www.youtube.com/shorts/")) {
