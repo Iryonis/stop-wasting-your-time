@@ -105,6 +105,7 @@ if (!window.videoCheckerInjected) {
    */
   const checkForNewVideo = () => {
     if (!isExtensionValid) return;
+    if (!window.location.href.includes("www.youtube.com/shorts/")) return;
 
     // Search for video elements
     const videos = document.querySelectorAll("video");
@@ -127,7 +128,7 @@ if (!window.videoCheckerInjected) {
   videoCheckInterval = setInterval(checkForNewVideo, 2000);
 
   // Initial check with slight delay
-  setTimeout(checkWithTimeout, 1000);
+  setTimeout(checkForNewVideo, 1000);
 
   // Before unload cleanup
   window.addEventListener("beforeunload", () => {

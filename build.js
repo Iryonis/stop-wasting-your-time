@@ -30,6 +30,7 @@ esbuild.buildSync({
     "src/popup/popup.js",
     "src/content_scripts/redirect.js",
     "src/content_scripts/video_checker.js",
+    "src/content_scripts/shorts_hider.js",
     "src/redirect_page/redirect_page.js",
     "src/i18n.js",
   ],

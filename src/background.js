@@ -11,7 +11,7 @@ let isFinished = false; // Flag to track if the countdown has finished
  * 1. Calls the function {@link handleCountdownState} with 'false' argument when the user leaves a Short tab.
  * It waits for the tab to be fully loaded before checking the URL.
  *
- * 2. If the URL contains "www.youtube.com" and the countdown HAS finished it injects the redirect script.
+ * 2. If the URL contains "www.youtube.com" and the countdown HAS finished it injects the redirect script and the short hider script.
  *
  * 3. If the URL contains "www.youtube.com/shorts/" and the countdown HAS NOT finished, it injects the video checker script.
  */
@@ -30,6 +30,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     // 2.
     if (isFinished) {
       if (tab.url && tab.url.includes("www.youtube.com")) {
+        // Redirect script
         chrome.scripting
           .executeScript({
             target: { tabId: tabId },
@@ -37,6 +38,15 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
           })
           .catch((err) =>
             console.error("Injection error onUpdated -> redirect:", err)
+          );
+        // Short hider script
+        chrome.scripting
+          .executeScript({
+            target: { tabId: tabId },
+            files: ["shorts_hider.js"],
+          })
+          .catch((err) =>
+            console.error("Injection error onUpdated -> short_hider:", err)
           );
       }
     } else {
