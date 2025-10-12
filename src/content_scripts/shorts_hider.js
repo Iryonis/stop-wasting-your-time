@@ -2,16 +2,20 @@
  * Shorts hider - Hide Shorts elements on YouTube once redirect is activated
  *
  * It first hides elements via CSS for immediate effect on page load,
- * then uses JavaScript and an Observer to hide any new Shorts elements that appear dynamically.
+ * then uses scroll events to hide any new Shorts elements that appear when scrolling.
  */
 if (!window.shortsHiderInjected) {
   window.shortsHiderInjected = true;
 
+  let isProcessing = false; // Prevent multiple simultaneous processing
+
   /**
    * Hide Shorts elements on the page
-   * It uses a MutationObserver to detect changes in the DOM and hide new Shorts elements as they appear.
    */
   const hideShortsElements = () => {
+    if (isProcessing) return;
+    isProcessing = true;
+
     // 1. "Shorts" title sections
     document
       .querySelectorAll("ytd-rich-section-renderer, ytd-shelf-renderer")
@@ -48,6 +52,8 @@ if (!window.shortsHiderInjected) {
           entry.hidden = true;
         }
       });
+
+    isProcessing = false;
   };
 
   /**
@@ -80,44 +86,28 @@ if (!window.shortsHiderInjected) {
   };
 
   /**
-   * Observer to monitor DOM changes and hide new Shorts elements
-   * @type {MutationObserver}
+   * Throttled scroll handler to hide new Shorts elements
    */
-  const observer = new MutationObserver((mutations) => {
-    let shouldProcess = false;
+  let scrollTimeout = null;
+  const handleScroll = () => {
+    // Throttle scroll events to avoid excessive processing
+    if (scrollTimeout) return;
 
-    for (const mutation of mutations) {
-      for (const node of mutation.addedNodes) {
-        if (node.nodeType === 1) {
-          if (
-            node.tagName === "YTD-REEL-SHELF-RENDERER" ||
-            node.tagName === "YTD-RICH-SECTION-RENDERER" ||
-            node.tagName === "YTD-SHELF-RENDERER" ||
-            node.tagName === "YTD-GUIDE-ENTRY-RENDERER"
-          ) {
-            shouldProcess = true;
-            break;
-          }
-        }
-      }
-      if (shouldProcess) break;
-    }
-
-    if (shouldProcess) {
-      setTimeout(hideShortsElements, 50);
-    }
-  });
-
-  const targetNode = document.querySelector("ytd-app") || document.body;
-  observer.observe(targetNode, {
-    childList: true,
-    subtree: true,
-  });
+    scrollTimeout = setTimeout(() => {
+      hideShortsElements();
+      scrollTimeout = null;
+    }, 200); // Process scroll events maximum every 200ms
+  };
 
   // Hide with CSS then with JS
   const init = () => {
     injectHidingCSSForInitialLoad();
+
+    // Initial hide after page load
     setTimeout(hideShortsElements, 100);
+
+    // Listen to scroll events for new content
+    window.addEventListener("scroll", handleScroll, { passive: true });
   };
 
   if (document.readyState === "loading") {
@@ -125,5 +115,9 @@ if (!window.shortsHiderInjected) {
   } else {
     init();
   }
-  console.log("Shorts hider initialized");
+
+  // Cleanup on page unload
+  window.addEventListener("beforeunload", () => {
+    window.removeEventListener("scroll", handleScroll);
+  });
 }

@@ -124,8 +124,8 @@ if (!window.videoCheckerInjected) {
     }
   };
 
-  // Check every two seconds to find new videos
-  videoCheckInterval = setInterval(checkForNewVideo, 2000);
+  // Check every second to find new videos
+  videoCheckInterval = setInterval(checkForNewVideo, 1000);
 
   // Initial check with slight delay
   setTimeout(checkForNewVideo, 1000);
