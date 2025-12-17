@@ -83,7 +83,7 @@ const handleCountdownState = async (test) => {
  * Handles the start, resume, or reset of the countdown based on the current state.
  *
  * 1. It checks if the countdown is active and if the last reset date matches today.
- *    If the last reset date does not match today and it is after {@link resetHour} AM, it resets the countdown and starts a new one.
+ *    If the last reset date does not match today OR the countdown was started the same day but before the reset hour, and it is after {@link resetHour} AM, it resets the countdown and starts a new one.
  *
  * 2. If the countdown has already been finished during the day, it does nothing.
  *
@@ -98,12 +98,14 @@ const startOrResumeCountdown = async () => {
     "countdownRemaining",
     "lastResetDate",
     "isFinished",
+    "startedSameDay",
   ]);
   const today = new Date();
 
   // 1.
   if (
-    storage.lastResetDate !== today.toDateString() &&
+    (storage.lastResetDate !== today.toDateString() ||
+      storage.startedSameDay) &&
     today.getHours() >= resetHour
   ) {
     await resetDailyCountdown();
@@ -134,13 +136,18 @@ const startNewCountdown = async () => {
   const data = await chrome.storage.sync.get(["countdownDurationNext"]);
   const duration = data.countdownDurationNext || countdownDefaultTime;
 
+  // If started between midnight and resetHour, put startedSameDay to true
+  const today = new Date();
+  const startedSameDay = today.getHours() < resetHour;
+
   await chrome.storage.local.set({
     countdownActive: true,
     countdownDuration: duration,
     countdownRemaining: duration,
     isPaused: false,
     isFinished: false,
-    lastResetDate: new Date().toDateString(),
+    lastResetDate: today.toDateString(),
+    startedSameDay: startedSameDay,
   });
 
   startCountdownTicker();
@@ -236,6 +243,7 @@ const resetDailyCountdown = async () => {
     isPaused: false,
     isFinished: false,
     lastResetDate: new Date().toDateString(),
+    startedSameDay: false,
   });
   isFinished = false;
 
@@ -245,7 +253,7 @@ const resetDailyCountdown = async () => {
 /**
  * Initializes the countdown.
  *
- * 1. If the last reset date does not match today and it is after {@link resetHour} AM, it resets the countdown.
+ * 1. If the last reset date does not match today OR the countdown was started the same day but before the reset hour, and it is after {@link resetHour} AM, it resets the countdown.
  * 2. If the countdown has already been finished during the day, it does nothing.
  * 3. If the countdown is active and has remaining time, it starts the countdown ticker and pause it.
  * @returns {Promise<void>} - Initializes the countdown by checking the last reset date and starting
@@ -257,12 +265,14 @@ const initializeCountdown = async () => {
     "countdownRemaining",
     "lastResetDate",
     "isFinished",
+    "startedSameDay",
   ]);
 
   // 1.
   const today = new Date();
   if (
-    storage.lastResetDate !== today.toDateString() &&
+    (storage.lastResetDate !== today.toDateString() ||
+      storage.startedSameDay) &&
     today.getHours() >= resetHour
   ) {
     await resetDailyCountdown();
